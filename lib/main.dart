@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'classes/todo.dart';
 import './data/todos.dart';
-
-var newPriority;
-var newDescription;
+import './data/priorities.dart';
+import 'Components/todolist.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
 }
@@ -35,31 +34,70 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Column editTodoContent(Todo todo) {
+  Color? addColor = const Color.fromARGB(255, 185, 125, 34);
+  String newPriority = '';
+  String newDescription = '';
+  int currentIndex = 0;
+  Column addTodoContent() {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: TextFormField(
-            initialValue: todo.priority,
-            onChanged: (value) => setState(() {
-              newPriority = value;
-            }),
-            decoration: const InputDecoration(
-                border: UnderlineInputBorder(), labelText: 'Priority'),
-          ),
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(5),
+              child: ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.green),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100.0),
+                            side: const BorderSide(color: Colors.green)))),
+                onPressed: () {},
+                child: const Text('Low'),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(5),
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.yellow),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100.0),
+                      side: const BorderSide(color: Colors.yellow),
+                    ),
+                  ),
+                ),
+                onPressed: () {},
+                child: const Text('Medium'),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(5),
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.red),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100.0),
+                      side: const BorderSide(color: Colors.red),
+                    ),
+                  ),
+                ),
+                onPressed: () {},
+                child: const Text('High'),
+              ),
+            ),
+          ],
         ),
         Padding(
           padding: const EdgeInsets.all(8),
           child: TextFormField(
-            initialValue: todo.description,
-            onChanged: (value) => setState(() {
-              newDescription = value;
-            }),
+            onChanged: (value) => setState(() => newDescription = value),
             decoration: const InputDecoration(
                 border: UnderlineInputBorder(), labelText: 'Description'),
           ),
-        )
+        ),
       ],
     );
   }
@@ -67,19 +105,22 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Todo App'),
-          actions: [
-            IconButton(
-              onPressed: () {
-                AlertDialog alert = AlertDialog(
-                  title: const Text('Add Todo'),
-                  content: Wrap(
-                    children: [AddTodoContent()],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
+      appBar: AppBar(
+        title: const Text('Todo App'),
+        actions: [
+          IconButton(
+            color: addColor,
+            onPressed: () {
+              AlertDialog alert = AlertDialog(
+                backgroundColor: addColor,
+                title: const Text('Add Todo'),
+                content: Wrap(
+                  children: [addTodoContent()],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      if (newDescription != '' || newPriority != '') {
                         var newTodo = Todo(
                             description: newDescription, priority: newPriority);
                         setState(() {
@@ -87,171 +128,30 @@ class _HomePageState extends State<HomePage> {
                           newDescription = '';
                           newPriority = '';
                         });
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('OK'),
-                    )
-                  ],
-                );
+                      }
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      'OK',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
+                ],
+              );
 
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return alert;
-                    });
-              },
-              icon: const Icon(
-                Icons.add,
-              ),
-            )
-          ],
-        ),
-        body: TodoList());
-  }
-}
-
-class AddTodoContent extends StatefulWidget {
-  AddTodoContent({Key? key}) : super(key: key);
-
-  @override
-  State<AddTodoContent> createState() => _AddTodoContentState();
-}
-
-class _AddTodoContentState extends State<AddTodoContent> {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: TextFormField(
-            onChanged: (value) => setState(() {
-              newPriority = value;
-            }),
-            decoration: const InputDecoration(
-                border: UnderlineInputBorder(), labelText: 'Priority'),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: TextFormField(
-            onChanged: (value) => setState(() {
-              newDescription = value;
-            }),
-            decoration: const InputDecoration(
-                border: UnderlineInputBorder(), labelText: 'Description'),
-          ),
-        )
-      ],
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return alert;
+                  });
+            },
+            icon: const Icon(
+              Icons.add,
+            ),
+          )
+        ],
+      ),
+      body: TodoList(todos: allTodos),
     );
   }
-}
-
-class TodoList extends StatefulWidget {
-  const TodoList({Key? key}) : super(key: key);
-
-  @override
-  State<TodoList> createState() => _TodoListState();
-}
-
-class _TodoListState extends State<TodoList> {
-  String editedDescription = '';
-  String editedPriority = '';
-
-  changeTodo(int index, String description, String priority) {
-    setState(() {
-      allTodos[index].description = description;
-      allTodos[index].priority = priority;
-    });
-  }
-
-  Column editTodoContent(Todo todo) {
-    editedDescription = todo.description;
-    editedPriority = todo.priority;
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: TextFormField(
-            initialValue: todo.priority,
-            onChanged: (value) => setState(() {
-              editedPriority = value;
-            }),
-            decoration: const InputDecoration(
-                border: UnderlineInputBorder(), labelText: 'Priority'),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: TextFormField(
-            initialValue: todo.description,
-            onChanged: (value) => setState(() {
-              editedDescription = value;
-            }),
-            decoration: const InputDecoration(
-                border: UnderlineInputBorder(), labelText: 'Description'),
-          ),
-        )
-      ],
-    );
-  }
-
-  List<DataRow> getRows(List<Todo> todos, BuildContext context) {
-    return todos.asMap().entries.map((entry) {
-      return DataRow(cells: [
-        DataCell(
-          Text(entry.value.priority),
-        ),
-        DataCell(
-          Text(entry.value.description),
-        ),
-        DataCell(
-          onTap: () {
-            AlertDialog alert = AlertDialog(
-              title: const Text('Add Todo'),
-              content: Wrap(
-                children: [editTodoContent(entry.value)],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    print(editedDescription);
-                    print(editedPriority);
-                    print(entry.key);
-                    changeTodo(entry.key, editedDescription, editedPriority);
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Save Edit'),
-                )
-              ],
-            );
-
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return alert;
-                });
-          },
-          Icon(Icons.more_vert),
-        ),
-      ]);
-    }).toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final columns = ['Priority', 'Description', 'Edit'];
-    return DataTable(
-      columns: getColumns(columns),
-      rows: getRows(allTodos, context),
-    );
-  }
-}
-
-List<DataColumn> getColumns(List<String> columns) {
-  return columns.map((String column) {
-    return DataColumn(
-      label: Text(column),
-    );
-  }).toList();
 }
