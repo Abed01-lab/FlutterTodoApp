@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:todoapp/data/todos.dart';
 import '../classes/todo.dart';
 
 class TodoList extends StatefulWidget {
-  List<Todo> todos;
-  TodoList({Key? key, required this.todos}) : super(key: key);
+  TodoList({Key? key}) : super(key: key);
 
   @override
   State<TodoList> createState() => _TodoListState();
@@ -15,8 +15,8 @@ class _TodoListState extends State<TodoList> {
 
   changeTodo(int index, String description, String priority) {
     setState(() {
-      widget.todos[index].description = description;
-      widget.todos[index].priority = priority;
+      allTodos[index].description = description;
+      allTodos[index].priority = priority;
     });
   }
 
@@ -92,7 +92,7 @@ class _TodoListState extends State<TodoList> {
                   return alert;
                 });
           },
-          Icon(Icons.more_vert),
+          const Icon(Icons.more_vert),
         ),
       ]);
     }).toList();
@@ -103,7 +103,7 @@ class _TodoListState extends State<TodoList> {
     final columns = ['Priority', 'Description', 'Edit'];
     return DataTable(
       columns: getColumns(columns),
-      rows: getRows(widget.todos, context),
+      rows: getRows(allTodos, context),
     );
   }
 }
