@@ -1,30 +1,29 @@
 import 'package:flutter/material.dart';
-import 'classes/todo.dart';
-import './data/todos.dart';
-import 'Components/todolist.dart';
-import './pages/make_todo_page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'pages/todo_list_builder.dart';
+import 'Components/create_new_todo.dart';
 
-void main() {
-  runApp(MyApp());
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({Key? key}) : super(key: key);
-
-  void updateTodos() {}
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
-  HomePage({
+  const HomePage({
     Key? key,
   }) : super(key: key);
 
@@ -33,7 +32,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +43,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => TodoPage(),
+                  builder: (context) => CreateNewTodo(),
                 ),
               );
             },
@@ -55,7 +53,7 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-      body: TodoList(),
+      body: const TodoListBuilder(),
     );
   }
 }
